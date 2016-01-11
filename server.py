@@ -1,6 +1,6 @@
 #  coding: utf-8 
 import SocketServer
-
+from datetime import datetime
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,7 +32,65 @@ class MyWebServer(SocketServer.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
-        self.request.sendall("OK")
+
+        msg = self.data.split(' ')
+
+        if msg[0] == 'GET':
+            # requested file
+            req = msg[1]
+            #if it ends in /
+            if req[-1] == '/':
+                req += 'index.html'
+            if req in ['/index.html', '/base.css', '/deep/deep.css', '/deep/index.html']:
+                try:
+                    readFile = open('www'+req, 'r')
+                    content = readFile.read()
+                    readFile.close()
+                except:
+                    print('File Error')
+
+                if req[-4:] == 'html':
+                    mime = 'text/html'
+                elif req[-3:] == 'css':
+                    mime = 'text/css'
+                else:
+                    mime = 'text/plain'
+
+                status = 'HTTP/1.1 200 OK\r\n'
+                server = 'Server: Not a Server\r\n'
+                date = 'Date: ' + str(datetime.now()) + '\r\n'
+                mimeType = 'Content-Type: '+mime+'\r\n'
+                length = 'Content-Length: '+str(len(content))+'\r\n'
+                end = '\r\n'
+
+                reply = status + server + date + mimeType + length + end + content
+
+                self.request.send(reply)
+            else:
+                print '404'
+                content = '''<!DOCTYPE html>
+                    <html>
+                    <body>
+                    <h1>404 Error</h1>
+                    <p>Webpage not found!! Sorry not today!</p>
+                    </body>
+                    </html>'''
+                status = 'HTTP/1.1 404 Not Found'
+                server = 'Server: Not a Server\r\n'
+                date = 'Date: ' + str(datetime.now()) + '\r\n'
+                mimeType = 'Content-Type: '+'text/html'+'\r\n'
+                length = 'Content-Length: '+str(len(content))+'\r\n'
+                end = '\r\n'
+
+                reply = status + server + date + mimeType + length + end + content
+                self.request.send(reply)
+
+        else: 
+            print 'not GET'
+
+
+
+
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
