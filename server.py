@@ -41,6 +41,8 @@ class MyWebServer(SocketServer.BaseRequestHandler):
             #if it ends in /
             if req[-1] == '/':
                 req += 'index.html'
+            elif req == '/deep':
+                req += '/index.html'
             if req in ['/index.html', '/base.css', '/deep/deep.css', '/deep/index.html']:
                 try:
                     readFile = open('www'+req, 'r')
