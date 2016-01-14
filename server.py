@@ -1,7 +1,7 @@
 #  coding: utf-8 
 import SocketServer
 from datetime import datetime
-# Copyright 2013 Abram Hindle, Eddie Antonio Santos
+# Copyright 2013 Abram Hindle, Eddie Antonio Santos, Cody Ingram
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,6 +43,8 @@ class MyWebServer(SocketServer.BaseRequestHandler):
                 req += 'index.html'
             elif req == '/deep':
                 req += '/index.html'
+            if req == '/deep.css':
+                req = '/deep' + req
             if req in ['/index.html', '/base.css', '/deep/deep.css', '/deep/index.html']:
                 try:
                     readFile = open('www'+req, 'r')
@@ -69,7 +71,6 @@ class MyWebServer(SocketServer.BaseRequestHandler):
 
                 self.request.send(reply)
             else:
-                print '404'
                 content = '''<!DOCTYPE html>
                     <html>
                     <body>
